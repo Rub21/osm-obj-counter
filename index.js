@@ -20,15 +20,16 @@ function init(pbfFile) {
     _.each(objConfig, function (v, k) {
       if (tags[k]) {
         countBykeys(k);
-        if (v !== '*') {
-          var values = v.split(',');
-          for (var i = 0; i < values.length; i++) {
-            var value = values[i];
-            if (tags[k] === value) {
-              countBykeysValues(k, value);
-            }
-          }
-        }
+        countBykeysValues(k, tags[k])
+        // if (v !== '*') {
+        //   var values = v.split(',');
+        //   for (var i = 0; i < values.length; i++) {
+        //     var value = values[i];
+        //     if (tags[k] === value) {
+        //       countBykeysValues(k, value);
+        //     }
+        // }
+        // }
       }
     });
   });
