@@ -18,6 +18,10 @@ function init(pbfFile) {
   var stream = new osmium.Stream(new osmium.Reader(file, location_handler));
   stream.on('data', function (data) {
     var tags = data.tags();
+    //dounble count in MultiPolygon
+    if (typeof data.geojson === 'function' && data.geojson().type === 'MultiPolygon') {
+      return;
+    }
     _.each(objConfig, function (v, k) {
       if (tags[k]) {
         //General counter
