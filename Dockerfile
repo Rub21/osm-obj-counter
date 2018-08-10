@@ -35,8 +35,5 @@ RUN npm install geojson2poly -g
 RUN wget -O - http://m.m.i24.cc/osmconvert.c | cc -x c - -lz -O3 -o osmconvert
 RUN cp osmconvert /usr/bin/osmconvert
 
-# RUN git clone https://github.com/RichRico/osmlazer.git
-# RUN cd osmlazer && git checkout readiness && git fetch --all && npm install
-
 RUN mkdir $workdir
 WORKDIR $workdir

@@ -1,7 +1,13 @@
 {
-    "highway": "motorway,trunk,primary,secondary,tertiary,unclassified,residential",
-    "building": "*",
-    "landuse": "commercial,construction,industrial,residential",
-    "power":"*",
+    "highway": {
+        "distance":"yes"
+    },
+    "building":  {
+        "area":"yes"
+    },
+    "landuse": "*",
+    "power": {
+        "area":"yes"
+    },
     "amenities":"*"
 }
