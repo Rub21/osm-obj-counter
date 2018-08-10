@@ -1,0 +1,38 @@
+{
+  "name": "osmstatus",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run lint && NODE_ENV=test tape test/*.test.js | tap-spec",
+    "lint": "./node_modules/.bin/standard src/**/**/*.js test/**/*.js  *.js || exit 0",
+    "fix": "./node_modules/.bin/standard --fix src/**/**/*.js test/**/*.js *.js || exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rub21/osmstatus.git"
+  },
+  "bin": {
+    "osmstatus": "index.js"
+  },
+  "bugs": {
+    "url": "https://github.com/Rub21/osmstatus/issues"
+  },
+  "homepage": "https://github.com/Rub21/osmstatus#readme",
+  "dependencies": {
+    "@turf/turf": "^4.6.1",
+    "buffered-writer": "^0.2.3",
+    "geojson-validation": "^0.1.6",
+    "mapbox-data-team": "^1.4.10",
+    "minimist": "^1.2.0",
+    "osmium": "^0.5.4",
+    "readline": "^1.3.0",
+    "time": "^0.12.0",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "standard": "^10.0.3",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.8.0"
+  }
+}
