@@ -1,4 +1,5 @@
-'use strict'
+#!/usr/bin/env node
+
 var fs = require('fs')
 var osmium = require('osmium')
 var _ = require('underscore')
@@ -23,8 +24,8 @@ function init(pbfFile) {
         countBykeysValues(k, tags[k]);
         //Areas and distance
         if (typeof data.geojson === 'function') {
-          propsByKey(k, data.geojson());
-          propsKeyValues(k, tags[k], data.geojson());
+          getDistanceAreaByKey(k, data.geojson());
+          getDistanceAreaByKeyValues(k, tags[k], data.geojson());
         }
       }
     });
@@ -66,8 +67,8 @@ function countBykeysValues(k, v) {
   }
 }
 
-//Distance
-function propsByKey(k, geojson) {
+//Distance and Area
+function getDistanceAreaByKey(k, geojson) {
   if (geojson.type === 'LineString') {
     counter[k].distance = counter[k].distance + distance(geojson)
   }
@@ -76,7 +77,7 @@ function propsByKey(k, geojson) {
   }
 }
 
-function propsKeyValues(k, v, geojson) {
+function getDistanceAreaByKeyValues(k, v, geojson) {
   if (geojson.type === 'LineString' || geojson.type === 'MultiLineString') {
     counter[k].type[v].distance = counter[k].type[v].distance + distance(geojson)
   }

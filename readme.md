@@ -1,6 +1,14 @@
 # Status of the map 
 
-- Build docker
+# Install
+
+
+```
+git clone https://github.com/Rub21/osmstatus.git
+cd osmstatus/
+npm link
+```
+<!-- - Build docker
 
 ```
 docker-compose build
@@ -12,4 +20,4 @@ docker-compose build
 ```
 docker run -v $PWD:/app -it rub21/map-status:latest /bin/bash
 
-```
+``` -->

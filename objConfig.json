@@ -1,13 +1,7 @@
 {
-    "highway": {
-        "distance":"yes"
-    },
-    "building":  {
-        "area":"yes"
-    },
+    "highway": "*",
+    "building": "*",
     "landuse": "*",
-    "power": {
-        "area":"yes"
-    },
+    "power": "*",
     "amenities":"*"
 }
