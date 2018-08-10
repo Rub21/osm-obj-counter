@@ -1,4 +1,6 @@
-# Status of the map 
+# OpenStreetMap status counter
+
+A tool to count the number of objects in a pbf file according to: https://github.com/Rub21/osmstatus/blob/master/objConfig.json
 
 # Install
 
@@ -8,16 +10,9 @@ git clone https://github.com/Rub21/osmstatus.git
 cd osmstatus/
 npm link
 ```
-<!-- - Build docker
+
+# Usage
 
 ```
-docker-compose build
+osmstatus <pbf file> > csv.csv
 ```
-
-- Run
-
-
-```
-docker run -v $PWD:/app -it rub21/map-status:latest /bin/bash
-
-``` -->
