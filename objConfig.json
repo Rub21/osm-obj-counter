@@ -1,7 +1,5 @@
 {
-    "highway": "*",
-    "building": "*",
-    "landuse": "*",
-    "power": "*",
-    "amenities":"*"
+    "highway": "residential,primary",
+    "building": "yes,house"
+  
 }

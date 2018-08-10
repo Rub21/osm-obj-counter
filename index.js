@@ -20,12 +20,27 @@ function init(pbfFile) {
     var tags = data.tags();
     _.each(objConfig, function (v, k) {
       if (tags[k]) {
+        //General counter
         countBykeys(k);
-        countBykeysValues(k, tags[k]);
-        //Areas and distance
         if (typeof data.geojson === 'function') {
           getDistanceAreaByKey(k, data.geojson());
-          getDistanceAreaByKeyValues(k, tags[k], data.geojson());
+        }
+        if (v !== '*') {
+          var values = v.split(',');
+          for (var i = 0; i < values.length; i++) {
+            var value = values[i];
+            if (tags[k] === value) {
+              countBykeysValues(k, value);
+              if (typeof data.geojson === 'function') {
+                getDistanceAreaByKeyValues(k, value, data.geojson());
+              }
+            }
+          }
+        } else {
+          countBykeysValues(k, tags[k]);
+          if (typeof data.geojson === 'function') {
+            getDistanceAreaByKeyValues(k, tags[k], data.geojson());
+          }
         }
       }
     });
@@ -34,9 +49,9 @@ function init(pbfFile) {
     //print result
     console.log(`tag,total,area,distace`);
     _.each(counter, function (val, key) {
-      console.log(`${key}, ${val.total},${val.area},${val.distance}`);
+      console.log(`${key}, ${val.total},${val.area.toFixed(2)},${val.distance.toFixed(2)}`);
       _.each(val.type, function (v, k) {
-        console.log(`${key}:${k}, ${v.total},${v.area},${v.distance}`);
+        console.log(`${key}:${k}, ${v.total},${v.area.toFixed(2)},${v.distance.toFixed(2)}`);
       });
     });
   });
