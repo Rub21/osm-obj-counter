@@ -1,4 +1,6 @@
 {
-    "power": "substation"
+    "power": "substation",
+    "amenity":"restaurant",
+    "highway":"*"
   
 }

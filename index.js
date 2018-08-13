@@ -7,49 +7,35 @@ var turf = require('@turf/turf')
 var objConfig = require('./objConfig.json');
 var argv = require('minimist')(process.argv.slice(2))
 var pbfFile = argv._[0];
-init(pbfFile)
 var counter = {};
+init(pbfFile)
 function init(pbfFile) {
-  var file = new osmium.File(pbfFile);
-  var reader = new osmium.Reader(file);
-  var location_handler = new osmium.LocationHandler();
-  var handler = new osmium.Handler();
-  osmium.apply(reader, location_handler, handler);
-  var stream = new osmium.Stream(new osmium.Reader(file, location_handler));
-  stream.on('data', function (data) {
-    var tags = data.tags();
-    //dounble count in MultiPolygon
-    if (typeof data.geojson === 'function' && data.geojson().type === 'MultiPolygon') {
-      return;
-    }
-    _.each(objConfig, function (v, k) {
-      if (tags[k]) {
-        //General counter
-        countBykeys(k);
-        if (typeof data.geojson === 'function') {
-          getDistanceAreaByKey(k, data.geojson());
-        }
-        if (v !== '*') {
-          var values = v.split(',');
-          for (var i = 0; i < values.length; i++) {
-            var value = values[i];
-            if (tags[k] === value) {
-              countBykeysValues(k, value);
-              if (typeof data.geojson === 'function') {
-                getDistanceAreaByKeyValues(k, value, data.geojson());
-              }
-            }
-          }
-        } else {
-          countBykeysValues(k, tags[k]);
-          if (typeof data.geojson === 'function') {
-            getDistanceAreaByKeyValues(k, tags[k], data.geojson());
-          }
-        }
-      }
-    });
+  var handlerA = new osmium.Handler();
+  handlerA.on("relation", function (relation) {
+    mainCounter(relation);
   });
-  stream.on('end', function () {
+
+  var reader = new osmium.BasicReader(pbfFile);
+  osmium.apply(reader, handlerA);
+
+  var handlerB = new osmium.Handler();
+  handlerB.on("node", function (node) {
+    mainCounter(node);
+  });
+
+  reader = new osmium.Reader(pbfFile);
+  osmium.apply(reader, handlerB);
+
+  var handlerC = new osmium.Handler();
+  handlerC.on("way", function (way) {
+    mainCounter(way)
+  });
+
+  reader = new osmium.Reader(pbfFile);
+  var locationHandler = new osmium.LocationHandler();
+  osmium.apply(reader, locationHandler, handlerC);
+
+  handlerC.on("done", function () {
     //print result
     console.log(`tag,total,area,distace`);
     _.each(counter, function (val, key) {
@@ -59,10 +45,45 @@ function init(pbfFile) {
       });
     });
   });
+
+  handlerA.end();
+  handlerB.end();
+  handlerC.end();
 }
+
+function mainCounter(data) {
+  var tags = data.tags();
+  _.each(objConfig, function (v, k) {
+    if (tags[k]) {
+      //General counter
+      countBykeys(k);
+      if (typeof data.geojson === 'function') {
+        getDistanceAreaByKey(k, data.geojson());
+      }
+      if (v !== '*') {
+        var values = v.split(',');
+        for (var i = 0; i < values.length; i++) {
+          var value = values[i];
+          if (tags[k] === value) {
+            countBykeysValues(k, value);
+            if (typeof data.geojson === 'function') {
+              getDistanceAreaByKeyValues(k, value, data.geojson());
+            }
+          }
+        }
+      } else {
+        countBykeysValues(k, tags[k]);
+        if (typeof data.geojson === 'function') {
+          getDistanceAreaByKeyValues(k, tags[k], data.geojson());
+        }
+      }
+    }
+  });
+}
+
 //counter by key
 function countBykeys(k) {
-  if (counter[k]) {
+  if (counter.hasOwnProperty(k)) {
     counter[k].total++;
   } else {
     //total
@@ -88,6 +109,9 @@ function countBykeysValues(k, v) {
 
 //Distance and Area
 function getDistanceAreaByKey(k, geojson) {
+  if (geojson.type !== 'Point' && geojson.type === 'LineString' && _.intersection(geojson.coordinates[0], geojson.coordinates[geojson.coordinates.length - 1]).length == 2) {
+    geojson = turf.lineToPolygon(geojson);
+  }
   if (geojson.type === 'LineString') {
     counter[k].distance = counter[k].distance + distance(geojson)
   }
