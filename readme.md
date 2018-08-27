@@ -18,15 +18,15 @@ Example of `conf.json` file:
 
 
 ```
-git clone https://github.com/Rub21/osmstatus.git
-cd osmstatus/
+git clone https://github.com/Rub21/osm-obj-counter.git
+cd osm-obj-counter/
 npm link
 ```
 
 # Usage
 
 ```
-osmstatus <PBF file> --config <Config file> --format <Format output>
+osmcounter <PBF file> --config <Config file> --format <Format output>
 ```
 
 By default, the output format is in json, is you want you can set it as: `--format csv` 
@@ -34,5 +34,5 @@ By default, the output format is in json, is you want you can set it as: `--form
 E.g
 
 ```
-osmstatus peru.pbf --config config.json > output.json
+osmcounter peru.pbf --config config.json > output.json
 ```
