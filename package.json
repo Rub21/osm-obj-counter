@@ -1,5 +1,5 @@
 {
-  "name": "osmstatus",
+  "name": "osm-obj-counter",
   "version": "0.1.0",
   "description": "",
   "main": "index.js",
@@ -10,15 +10,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Rub21/osmstatus.git"
+    "url": "git+https://github.com/Rub21/osm-obj-counter.git"
   },
   "bin": {
-    "osmstatus": "index.js"
+    "osmcounter": "index.js"
   },
   "bugs": {
-    "url": "https://github.com/Rub21/osmstatus/issues"
+    "url": "https://github.com/Rub21/osm-obj-counter/issues"
   },
-  "homepage": "https://github.com/Rub21/osmstatus#readme",
+  "homepage": "https://github.com/Rub21/osm-obj-counter#readme",
   "dependencies": {
     "@turf/turf": "^5.1.6",
     "buffered-writer": "^0.2.3",
