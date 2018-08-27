@@ -109,23 +109,27 @@ function countBykeysValues(k, v) {
 
 //Distance and Area
 function getDistanceAreaByKey(k, geojson) {
-  if (geojson.type !== 'Point' && geojson.type === 'LineString' && _.intersection(geojson.coordinates[0], geojson.coordinates[geojson.coordinates.length - 1]).length == 2) {
-    geojson = turf.lineToPolygon(geojson);
+  //Get area from any geometry which is LineString and the first coordinates and last are equal
+  if (geojson.type === 'LineString' && _.intersection(geojson.coordinates[0], geojson.coordinates[geojson.coordinates.length - 1]).length == 2) {
+    var polygon = turf.lineToPolygon(geojson);
+    counter[k].area = counter[k].area + area(polygon)
+
   }
+  //Get distance
   if (geojson.type === 'LineString') {
     counter[k].distance = counter[k].distance + distance(geojson)
-  }
-  if (geojson.type === 'MultiPolygon' || geojson.type === 'Polygon') {
-    counter[k].area = counter[k].area + area(geojson)
   }
 }
 
 function getDistanceAreaByKeyValues(k, v, geojson) {
-  if (geojson.type === 'LineString' || geojson.type === 'MultiLineString') {
-    counter[k].type[v].distance = counter[k].type[v].distance + distance(geojson)
+  // Get area
+  if (geojson.type === 'LineString' && _.intersection(geojson.coordinates[0], geojson.coordinates[geojson.coordinates.length - 1]).length == 2) {
+    var polygon = turf.lineToPolygon(geojson);
+    counter[k].type[v].area = counter[k].type[v].area + area(polygon)
   }
-  if (geojson.type === 'MultiPolygon' || geojson.type === 'Polygon') {
-    counter[k].type[v].area = counter[k].type[v].area + area(geojson)
+  // Get distance
+  if (geojson.type === 'LineString') {
+    counter[k].type[v].distance = counter[k].type[v].distance + distance(geojson)
   }
 }
 

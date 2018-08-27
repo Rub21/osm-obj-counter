@@ -1,6 +1,4 @@
 {
-    "power": "substation",
-    "amenity":"restaurant",
-    "highway":"*"
+    "landuse":"farmland"
   
 }
