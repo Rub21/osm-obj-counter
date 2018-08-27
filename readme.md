@@ -1,6 +1,6 @@
-# OpenStreetMap status counter
+# OpenStreetMap objects counter
 
-A tool to count the number of objects in a pbf file according to a configuration file:
+A tool to count the number of objects in a PBF file according to the configuration file:
 
 Example of `conf.json` file:
 
@@ -10,6 +10,9 @@ Example of `conf.json` file:
     "highway":"*"
 }
 ```
+
+- If you want to count by a specific object, you should set the value, `"landuse":"farmland"`
+- If you want to count all the values, set the values to `*`,  `"highway":"*"`
 
 # Install
 
@@ -26,10 +29,9 @@ npm link
 osmstatus <PBF file> --config <Config file> --format <Format output>
 ```
 
-By default the output format is in json, is you want you can set it as: `--format csv` 
+By default, the output format is in json, is you want you can set it as: `--format csv` 
 
 E.g
-
 
 ```
 osmstatus peru.pbf --config config.json > output.json
