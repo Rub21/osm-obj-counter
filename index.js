@@ -38,7 +38,7 @@ function init (pbfFile) {
   handlerC.on('done', function () {
     // print result
     if (argv.format === 'csv') {
-      console.log(`tag,total,node,way,relation,area,distace`)
+      console.log(`tag,total,node,way,relation,area,distance`)
       _.each(counter, function (val, key) {
         console.log(`${key}, ${val.total},${val.node},${val.way},${val.relation},${val.area.toFixed(2)},${val.distance.toFixed(2)}`)
         _.each(val.types, function (v, k) {
