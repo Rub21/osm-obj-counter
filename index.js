@@ -9,34 +9,28 @@ var util = require('./util');
 var pbfFile = argv._[0]
 var objConfig = JSON.parse(fs.readFileSync(argv.config).toString())
 var counter = {};
-
-
-
-
-argv.users = 'ediyes,karitotp,piligab';
-
-var countByUser = argv.users === '*';
-// Set the first key to count
-if (countByUser) {
-  counter['*'] = {};
+if (!argv.users) {
+  counter['__'] = {};
 } else {
   var users = argv.users.split(',');
   for (let d = 0; d < users.length; d++) {
     counter[users[d]] = {};
   }
 }
-
 init(pbfFile)
 
 function init(pbfFile) {
   var handlerA = new osmium.Handler()
   handlerA.on('relation', function (relation) {
-
-    if (countByUser) {
-      counter['*'] = mainCounter(relation, 'relation', counter['*']);
-    } else {
-      if(counter[relation.user])
-
+    if (!argv.users) {
+      //Counting  the base map
+      counter['__'] = mainCounter(relation, 'relation', counter['__']);
+    } else if (argv.users === '*') {
+      //Counting for all users
+      if (!counter[relation.user]) counter[relation.user] = {};
+      counter[relation.user] = mainCounter(relation, 'relation', counter[relation.user]);
+    } else if (counter[relation.user]) {
+      //Counting for specific users
       counter[relation.user] = mainCounter(relation, 'relation', counter[relation.user]);
     }
   })
@@ -46,14 +40,17 @@ function init(pbfFile) {
 
   var handlerB = new osmium.Handler()
   handlerB.on('node', function (node) {
-    // counter = mainCounter(node, 'node', counter)
-    if (countByUser) {
-      counter['*'] = mainCounter(node, 'node', counter['*']);
-    } else {
-      if(counter[node.user])
+    if (!argv.users) {
+      //Counting  the base map
+      counter['__'] = mainCounter(node, 'node', counter['__']);
+    } else if (argv.users === '*') {
+      //Counting for all users
+      if (!counter[node.user]) counter[node.user] = {};
+      counter[node.user] = mainCounter(node, 'node', counter[node.user]);
+    } else if (counter[node.user]) {
+      //Counting for specific users
       counter[node.user] = mainCounter(node, 'node', counter[node.user]);
     }
-
   })
 
   reader = new osmium.Reader(pbfFile)
@@ -61,11 +58,15 @@ function init(pbfFile) {
 
   var handlerC = new osmium.Handler()
   handlerC.on('way', function (way) {
-    // counter = mainCounter(way, 'way', counter)
-    if (countByUser) {
-      counter['*'] = mainCounter(way, 'way', counter['*']);
-    } else {
-      if(counter[way.user])
+    if (!argv.users) {
+      //Counting  the base map
+      counter['__'] = mainCounter(way, 'way', counter['__']);
+    } else if (argv.users === '*') {
+      //Counting for all users
+      if (!counter[way.user]) counter[way.user] = {};
+      counter[way.user] = mainCounter(way, 'way', counter[way.user]);
+    } else if (counter[way.user]) {
+      //Counting for specific users
       counter[way.user] = mainCounter(way, 'way', counter[way.user]);
     }
   })
@@ -77,13 +78,25 @@ function init(pbfFile) {
   handlerC.on('done', function () {
     // print result
     if (argv.format === 'csv') {
-      console.log(`tag,total,node,way,relation,area,distance`)
-      _.each(counter, function (val, key) {
-        console.log(`${key}, ${val.total},${val.node},${val.way},${val.relation},${val.area.toFixed(2)},${val.distance.toFixed(2)}`)
-        _.each(val.types, function (v, k) {
-          console.log(`${key}:${k}, ${v.total},${v.node},${v.way},${v.relation},${v.area.toFixed(2)},${v.distance.toFixed(2)}`)
+      if (!argv.users) {
+        console.log('tag,total,node,way,relation,area,distance')
+        _.each(counter['__'], function (val, key) {
+          console.log(`${key}, ${val.total},${val.node},${val.way},${val.relation},${val.area.toFixed(2)},${val.distance.toFixed(2)}`)
+          _.each(val.types, function (v, k) {
+            console.log(`${key}:${k}, ${v.total},${v.node},${v.way},${v.relation},${v.area.toFixed(2)},${v.distance.toFixed(2)}`)
+          })
         })
-      })
+      } else {
+        console.log('user,tag,total,node,way,relation,area,distance');
+        _.each(counter, function (userVal, userKey) {
+          _.each(userVal, function (val, key) {
+            console.log(`${userKey},${key}, ${val.total},${val.node},${val.way},${val.relation},${val.area.toFixed(2)},${val.distance.toFixed(2)}`)
+            _.each(val.types, function (v, k) {
+              console.log(`${userKey},${key}:${k}, ${v.total},${v.node},${v.way},${v.relation},${v.area.toFixed(2)},${v.distance.toFixed(2)}`)
+            })
+          })
+        });
+      }
     } else {
       console.log(JSON.stringify(counter))
     }
