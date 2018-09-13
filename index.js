@@ -8,13 +8,37 @@ var argv = require('minimist')(process.argv.slice(2))
 var util = require('./util');
 var pbfFile = argv._[0]
 var objConfig = JSON.parse(fs.readFileSync(argv.config).toString())
-var counter = {}
+var counter = {};
+
+
+
+
+argv.users = 'ediyes,karitotp,piligab';
+
+var countByUser = argv.users === '*';
+// Set the first key to count
+if (countByUser) {
+  counter['*'] = {};
+} else {
+  var users = argv.users.split(',');
+  for (let d = 0; d < users.length; d++) {
+    counter[users[d]] = {};
+  }
+}
+
 init(pbfFile)
 
 function init(pbfFile) {
   var handlerA = new osmium.Handler()
   handlerA.on('relation', function (relation) {
-    counter = mainCounter(relation, 'relation', counter)
+
+    if (countByUser) {
+      counter['*'] = mainCounter(relation, 'relation', counter['*']);
+    } else {
+      if(counter[relation.user])
+
+      counter[relation.user] = mainCounter(relation, 'relation', counter[relation.user]);
+    }
   })
 
   var reader = new osmium.BasicReader(pbfFile)
@@ -22,7 +46,14 @@ function init(pbfFile) {
 
   var handlerB = new osmium.Handler()
   handlerB.on('node', function (node) {
-    counter = mainCounter(node, 'node', counter)
+    // counter = mainCounter(node, 'node', counter)
+    if (countByUser) {
+      counter['*'] = mainCounter(node, 'node', counter['*']);
+    } else {
+      if(counter[node.user])
+      counter[node.user] = mainCounter(node, 'node', counter[node.user]);
+    }
+
   })
 
   reader = new osmium.Reader(pbfFile)
@@ -30,7 +61,13 @@ function init(pbfFile) {
 
   var handlerC = new osmium.Handler()
   handlerC.on('way', function (way) {
-    counter = mainCounter(way, 'way', counter)
+    // counter = mainCounter(way, 'way', counter)
+    if (countByUser) {
+      counter['*'] = mainCounter(way, 'way', counter['*']);
+    } else {
+      if(counter[way.user])
+      counter[way.user] = mainCounter(way, 'way', counter[way.user]);
+    }
   })
 
   reader = new osmium.Reader(pbfFile)
@@ -51,14 +88,13 @@ function init(pbfFile) {
       console.log(JSON.stringify(counter))
     }
   })
-
   handlerA.end()
   handlerB.end()
   handlerC.end()
 }
 
 function mainCounter(data, type, objCounter) {
-  var tags = data.tags()
+  var tags = data.tags();
   _.each(objConfig, function (v, k) {
     if (tags[k]) {
       // General counter
