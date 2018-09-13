@@ -1,4 +1,4 @@
-# Getting base map  for each estae of Peru
+# Getting base map  for each estate of Peru
 
 Let's get a PBF file of Peru form : http://download.geofabrik.de
 
