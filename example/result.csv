@@ -1,4 +1,3 @@
-region,tag,total,node,way,relation,area,distance
 Amazonas,highway,2984,6,2977,1,40.29,4678.14
 Amazonas,highway:residential,1763,0,1762,1,0,644.23
 Amazonas,highway:bus_stop,5,5,0,0,0,0

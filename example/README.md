@@ -14,11 +14,6 @@ Install
 
  Open the file `gadm36_PER_1.shp` using Qgis and save it as geojson file. Make sure your geojson file has an attribute `name` for each state.
  
-## Step 2: Customize the geojson file.
-
-```
-geokit fc2frows peru.geojson > peru.json
-```
 
 ## Step 3: Run the `index.sh` script
 
