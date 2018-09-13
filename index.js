@@ -5,14 +5,16 @@ var osmium = require('osmium')
 var _ = require('underscore')
 var turf = require('@turf/turf')
 var argv = require('minimist')(process.argv.slice(2))
+var util = require('./util');
 var pbfFile = argv._[0]
 var objConfig = JSON.parse(fs.readFileSync(argv.config).toString())
 var counter = {}
 init(pbfFile)
-function init (pbfFile) {
+
+function init(pbfFile) {
   var handlerA = new osmium.Handler()
   handlerA.on('relation', function (relation) {
-    mainCounter(relation, 'relation')
+    counter = mainCounter(relation, 'relation', counter)
   })
 
   var reader = new osmium.BasicReader(pbfFile)
@@ -20,7 +22,7 @@ function init (pbfFile) {
 
   var handlerB = new osmium.Handler()
   handlerB.on('node', function (node) {
-    mainCounter(node, 'node')
+    counter = mainCounter(node, 'node', counter)
   })
 
   reader = new osmium.Reader(pbfFile)
@@ -28,7 +30,7 @@ function init (pbfFile) {
 
   var handlerC = new osmium.Handler()
   handlerC.on('way', function (way) {
-    mainCounter(way, 'way')
+    counter = mainCounter(way, 'way', counter)
   })
 
   reader = new osmium.Reader(pbfFile)
@@ -55,14 +57,14 @@ function init (pbfFile) {
   handlerC.end()
 }
 
-function mainCounter (data, type) {
+function mainCounter(data, type, objCounter) {
   var tags = data.tags()
   _.each(objConfig, function (v, k) {
     if (tags[k]) {
       // General counter
-      countBykeys(k, type)
+      objCounter = countBykeys(k, type, objCounter)
       if (typeof data.geojson === 'function') {
-        getDistanceAreaByKey(k, data.geojson())
+        objCounter = getDistanceAreaByKey(k, data.geojson(), objCounter)
       }
       // Count by key and values
       if (v !== '*') {
@@ -70,101 +72,88 @@ function mainCounter (data, type) {
         for (var i = 0; i < values.length; i++) {
           var value = values[i]
           if (tags[k] === value) {
-            countBykeysValues(k, value, type)
+            objCounter = countBykeysValues(k, value, type, objCounter)
             if (typeof data.geojson === 'function') {
-              getDistanceAreaByKeyValues(k, value, data.geojson())
+              objCounter = getDistanceAreaByKeyValues(k, value, data.geojson(), objCounter)
             }
           }
         }
       } else {
-        countBykeysValues(k, tags[k], type)
+        objCounter = countBykeysValues(k, tags[k], type, objCounter)
         if (typeof data.geojson === 'function') {
-          getDistanceAreaByKeyValues(k, tags[k], data.geojson())
+          objCounter = getDistanceAreaByKeyValues(k, tags[k], data.geojson(), objCounter)
         }
       }
     }
   })
+
+  return objCounter;
 }
 
 // counter by key
-function countBykeys (k, type) {
-  if (counter.hasOwnProperty(k)) {
-    counter[k].total++
-    counter[k][type]++
+function countBykeys(k, type, objCounter) {
+  if (objCounter.hasOwnProperty(k)) {
+    objCounter[k].total++
+    objCounter[k][type]++
   } else {
-    counter[k] = {}
+    objCounter[k] = {}
     // Counting by type of values
-    counter[k].types = {}
+    objCounter[k].types = {}
     // Counting the total of objects
-    counter[k].node = 0
-    counter[k].way = 0
-    counter[k].relation = 0
-    counter[k].total = 1
-    counter[k][type] = 1
+    objCounter[k].node = 0
+    objCounter[k].way = 0
+    objCounter[k].relation = 0
+    objCounter[k].total = 1
+    objCounter[k][type] = 1
     // Measures
-    counter[k].area = 0
-    counter[k].distance = 0
+    objCounter[k].area = 0
+    objCounter[k].distance = 0
   }
+  return objCounter;
 }
 // counter by key and value
-function countBykeysValues (k, v, type) {
-  if (counter[k].types[v]) {
-    counter[k].types[v].total++
-    counter[k].types[v][type]++
+function countBykeysValues(k, v, type, objCounter) {
+  if (objCounter[k].types[v]) {
+    objCounter[k].types[v].total++
+    objCounter[k].types[v][type]++
   } else {
-    counter[k].types[v] = {}
-    counter[k].types[v].node = 0
-    counter[k].types[v].way = 0
-    counter[k].types[v].relation = 0
-    counter[k].types[v][type] = 1
-    counter[k].types[v].total = 1
+    objCounter[k].types[v] = {}
+    objCounter[k].types[v].node = 0
+    objCounter[k].types[v].way = 0
+    objCounter[k].types[v].relation = 0
+    objCounter[k].types[v][type] = 1
+    objCounter[k].types[v].total = 1
     // Measures
-    counter[k].types[v].area = 0
-    counter[k].types[v].distance = 0
+    objCounter[k].types[v].area = 0
+    objCounter[k].types[v].distance = 0
   }
+  return objCounter;
 }
 
 // Distance and Area
-function getDistanceAreaByKey (k, geojson) {
+function getDistanceAreaByKey(k, geojson, objCounter) {
   // Get area from any geometry which is LineString && the first and last coordinates are equal
   if (geojson.type === 'LineString' && _.intersection(geojson.coordinates[0], geojson.coordinates[geojson.coordinates.length - 1]).length === 2) {
     var polygon = turf.lineToPolygon(geojson)
-    counter[k].area = counter[k].area + area(polygon)
+    objCounter[k].area = objCounter[k].area + util.area(polygon)
   }
   // Get distance
   if (geojson.type === 'LineString') {
-    counter[k].distance = counter[k].distance + distance(geojson)
+    objCounter[k].distance = objCounter[k].distance + util.distance(geojson)
   }
+  return objCounter;
 }
 
-function getDistanceAreaByKeyValues (k, v, geojson) {
+function getDistanceAreaByKeyValues(k, v, geojson, objCounter) {
   // Get area
   if (geojson.type === 'LineString' && _.intersection(geojson.coordinates[0], geojson.coordinates[geojson.coordinates.length - 1]).length === 2) {
     var polygon = turf.lineToPolygon(geojson)
-    counter[k].types[v].area = counter[k].types[v].area + area(polygon)
+    objCounter[k].types[v].area = objCounter[k].types[v].area + util.area(polygon)
   }
   // Get distance
   if (geojson.type === 'LineString') {
-    counter[k].types[v].distance = counter[k].types[v].distance + distance(geojson)
+    objCounter[k].types[v].distance = objCounter[k].types[v].distance + util.distance(geojson)
   }
+  return objCounter;
 }
 
-function distance (line) {
-  var lineDistance = 0
-  for (let i = 0; i < line.coordinates.length - 1; i++) {
-    var coord1 = line.coordinates[i]
-    var coord2 = line.coordinates[i + 1]
-    var from = turf.point(coord1)
-    var to = turf.point(coord2)
-    var d = turf.distance(from, to, {
-      units: 'kilometers'
-    })
-    lineDistance += d
-  }
-  return lineDistance
-}
-
-function area (polygon) {
-  // turf.area return in square meter , let's convert to square meters
-  return turf.area(polygon) / 1000
-}
