@@ -5,33 +5,33 @@ var osmium = require('osmium')
 var _ = require('underscore')
 var turf = require('@turf/turf')
 var argv = require('minimist')(process.argv.slice(2))
-var util = require('./util');
+var util = require('./util')
 var pbfFile = argv._[0]
 var objConfig = JSON.parse(fs.readFileSync(argv.config).toString())
-var counter = {};
+var counter = {}
 if (!argv.users) {
-  counter['__'] = {};
+  counter['__'] = {}
 } else {
-  var users = argv.users.split(',');
+  var users = argv.users.split(',')
   for (let d = 0; d < users.length; d++) {
-    counter[users[d]] = {};
+    counter[users[d]] = {}
   }
 }
 init(pbfFile)
 
-function init(pbfFile) {
+function init (pbfFile) {
   var handlerA = new osmium.Handler()
   handlerA.on('relation', function (relation) {
     if (!argv.users) {
-      //Counting  the base map
-      counter['__'] = mainCounter(relation, 'relation', counter['__']);
+      // Counting  the base map
+      counter['__'] = mainCounter(relation, 'relation', counter['__'])
     } else if (argv.users === '*') {
-      //Counting for all users
-      if (!counter[relation.user]) counter[relation.user] = {};
-      counter[relation.user] = mainCounter(relation, 'relation', counter[relation.user]);
+      // Counting for all users
+      if (!counter[relation.user]) counter[relation.user] = {}
+      counter[relation.user] = mainCounter(relation, 'relation', counter[relation.user])
     } else if (counter[relation.user]) {
-      //Counting for specific users
-      counter[relation.user] = mainCounter(relation, 'relation', counter[relation.user]);
+      // Counting for specific users
+      counter[relation.user] = mainCounter(relation, 'relation', counter[relation.user])
     }
   })
 
@@ -41,15 +41,15 @@ function init(pbfFile) {
   var handlerB = new osmium.Handler()
   handlerB.on('node', function (node) {
     if (!argv.users) {
-      //Counting  the base map
-      counter['__'] = mainCounter(node, 'node', counter['__']);
+      // Counting  the base map
+      counter['__'] = mainCounter(node, 'node', counter['__'])
     } else if (argv.users === '*') {
-      //Counting for all users
-      if (!counter[node.user]) counter[node.user] = {};
-      counter[node.user] = mainCounter(node, 'node', counter[node.user]);
+      // Counting for all users
+      if (!counter[node.user]) counter[node.user] = {}
+      counter[node.user] = mainCounter(node, 'node', counter[node.user])
     } else if (counter[node.user]) {
-      //Counting for specific users
-      counter[node.user] = mainCounter(node, 'node', counter[node.user]);
+      // Counting for specific users
+      counter[node.user] = mainCounter(node, 'node', counter[node.user])
     }
   })
 
@@ -59,15 +59,15 @@ function init(pbfFile) {
   var handlerC = new osmium.Handler()
   handlerC.on('way', function (way) {
     if (!argv.users) {
-      //Counting  the base map
-      counter['__'] = mainCounter(way, 'way', counter['__']);
+      // Counting  the base map
+      counter['__'] = mainCounter(way, 'way', counter['__'])
     } else if (argv.users === '*') {
-      //Counting for all users
-      if (!counter[way.user]) counter[way.user] = {};
-      counter[way.user] = mainCounter(way, 'way', counter[way.user]);
+      // Counting for all users
+      if (!counter[way.user]) counter[way.user] = {}
+      counter[way.user] = mainCounter(way, 'way', counter[way.user])
     } else if (counter[way.user]) {
-      //Counting for specific users
-      counter[way.user] = mainCounter(way, 'way', counter[way.user]);
+      // Counting for specific users
+      counter[way.user] = mainCounter(way, 'way', counter[way.user])
     }
   })
 
@@ -87,7 +87,7 @@ function init(pbfFile) {
           })
         })
       } else {
-        console.log('user,tag,total,node,way,relation,area,distance');
+        console.log('user,tag,total,node,way,relation,area,distance')
         _.each(counter, function (userVal, userKey) {
           _.each(userVal, function (val, key) {
             console.log(`${userKey},${key}, ${val.total},${val.node},${val.way},${val.relation},${val.area.toFixed(2)},${val.distance.toFixed(2)}`)
@@ -95,7 +95,7 @@ function init(pbfFile) {
               console.log(`${userKey},${key}:${k}, ${v.total},${v.node},${v.way},${v.relation},${v.area.toFixed(2)},${v.distance.toFixed(2)}`)
             })
           })
-        });
+        })
       }
     } else {
       console.log(JSON.stringify(counter))
@@ -106,8 +106,8 @@ function init(pbfFile) {
   handlerC.end()
 }
 
-function mainCounter(data, type, objCounter) {
-  var tags = data.tags();
+function mainCounter (data, type, objCounter) {
+  var tags = data.tags()
   _.each(objConfig, function (v, k) {
     if (tags[k]) {
       // General counter
@@ -136,11 +136,11 @@ function mainCounter(data, type, objCounter) {
     }
   })
 
-  return objCounter;
+  return objCounter
 }
 
 // counter by key
-function countBykeys(k, type, objCounter) {
+function countBykeys (k, type, objCounter) {
   if (objCounter.hasOwnProperty(k)) {
     objCounter[k].total++
     objCounter[k][type]++
@@ -158,10 +158,10 @@ function countBykeys(k, type, objCounter) {
     objCounter[k].area = 0
     objCounter[k].distance = 0
   }
-  return objCounter;
+  return objCounter
 }
 // counter by key and value
-function countBykeysValues(k, v, type, objCounter) {
+function countBykeysValues (k, v, type, objCounter) {
   if (objCounter[k].types[v]) {
     objCounter[k].types[v].total++
     objCounter[k].types[v][type]++
@@ -176,11 +176,11 @@ function countBykeysValues(k, v, type, objCounter) {
     objCounter[k].types[v].area = 0
     objCounter[k].types[v].distance = 0
   }
-  return objCounter;
+  return objCounter
 }
 
 // Distance and Area
-function getDistanceAreaByKey(k, geojson, objCounter) {
+function getDistanceAreaByKey (k, geojson, objCounter) {
   // Get area from any geometry which is LineString && the first and last coordinates are equal
   if (geojson.type === 'LineString' && _.intersection(geojson.coordinates[0], geojson.coordinates[geojson.coordinates.length - 1]).length === 2) {
     var polygon = turf.lineToPolygon(geojson)
@@ -190,10 +190,10 @@ function getDistanceAreaByKey(k, geojson, objCounter) {
   if (geojson.type === 'LineString') {
     objCounter[k].distance = objCounter[k].distance + util.distance(geojson)
   }
-  return objCounter;
+  return objCounter
 }
 
-function getDistanceAreaByKeyValues(k, v, geojson, objCounter) {
+function getDistanceAreaByKeyValues (k, v, geojson, objCounter) {
   // Get area
   if (geojson.type === 'LineString' && _.intersection(geojson.coordinates[0], geojson.coordinates[geojson.coordinates.length - 1]).length === 2) {
     var polygon = turf.lineToPolygon(geojson)
@@ -203,6 +203,5 @@ function getDistanceAreaByKeyValues(k, v, geojson, objCounter) {
   if (geojson.type === 'LineString') {
     objCounter[k].types[v].distance = objCounter[k].types[v].distance + util.distance(geojson)
   }
-  return objCounter;
+  return objCounter
 }
-
