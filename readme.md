@@ -6,7 +6,7 @@ This is a tool for counting the number of objects in a PBF or OSM file according
 
 
 ```
-git clone https://github.com/Rub21/osm-obj-counter.git
+git clone https://github.com/developmentseed/osm-obj-counter.git
 cd osm-obj-counter/
 npm link
 ```
@@ -21,7 +21,7 @@ osmcounter <PBF file or OSM FILE> --config <Config file> --format <Format output
 
 - `--config` : Required parameter, The app will count the objects according to this configuration file.
 
-Example of `conf.json` file:
+Example of `config.json` file:
 
 ```js
 {
@@ -38,7 +38,7 @@ Example of `conf.json` file:
 
 - `--users` : If you set this argument, you can set to count for the specific users like `--users 'piligab,karitotp,Rub21'` or if you want to count all user you can set it as: `--users '*'`, 
 
-E.g: Gettin the base map
+E.g: Getting the base map
 
 ```
 osmcounter peru.pbf --config config.json > output.json
@@ -48,4 +48,10 @@ E.g: Getting the base map by user
 
 ```
 osmcounter peru.pbf --config config.json --users 'piligab,karitotp,Rub21' > output.json
+```
+
+E.g: Getting the base map in csv format 
+
+```
+osmcounter peru.pbf --config config.json --format csv > output.csv
 ```

@@ -16,8 +16,8 @@ function distance (line) {
 }
 
 function area (polygon) {
-    // turf.area return in square meter , let's convert to square meters
-  return turf.area(polygon) / 1000
+    // turf.area return in square meter , let's convert to square kilometers
+  return turf.area(polygon) / 1000000
 }
 
 module.exports = {
